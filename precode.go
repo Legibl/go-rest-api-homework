@@ -50,7 +50,10 @@ func getTask(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_,err=w.Write(resp)
+	if err != nil {
+		fmt.Printf("Ошибка: %s", err.Error())
+	}
 }
 
 func getTaskId(w http.ResponseWriter, r *http.Request) {
@@ -62,17 +65,22 @@ func getTaskId(w http.ResponseWriter, r *http.Request) {
 	}
 	resp, err := json.Marshal(task)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, err =w.Write(resp)
+	if err != nil {
+		fmt.Printf("Ошибка: %s ",err.Error())
+	}
+	
 }
 
 func postTask(w http.ResponseWriter, r *http.Request) {
 	var task Task
 	var buf bytes.Buffer
+	tasks[task.ID] = task
 	_, err := buf.ReadFrom(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -81,9 +89,12 @@ func postTask(w http.ResponseWriter, r *http.Request) {
 
 	if err = json.Unmarshal(buf.Bytes(), &task); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return	
+	}
+	if _, exists := tasks[task.ID]; exists {
+		http.Error(w, "Задание с таким номером ID уже существует", http.StatusBadRequest)
 		return
 	}
-	tasks[task.ID] = task
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
