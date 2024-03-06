@@ -120,7 +120,7 @@ func main() {
 
 	r.Get("/tasks", getTask)
 	r.Get("/tasks/{id}", getTaskId)
-	r.Post("/tasks/{id}", postTask)
+	r.Post("/tasks", postTask)
 	r.Delete("/tasks/{id}", deletTask)
 
 	if err := http.ListenAndServe(":8080", r); err != nil {
